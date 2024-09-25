@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ispit</title>
+    <style>
+     label{
+      display: inline-block;
+      margin-bottom: 10px;
+      width: 200px;
+     }
+     #btn{
+      width: 100px;
+     }
+     #right{
+      margin-top: -130px;
+      position: absolute;
+      margin-left: 700px;
+      position: fixed;
+     }
+     table,thead,tbody,tr,th,td{
+      border:1px solid black;
+      border-collapse: collapse;
+     }
+     #otkazano{
+      width: 100px;
+      margin: 10px;
+     }
+     #dostaveno{
+      width: 100px;
+      margin: 10px;
+      margin-bottom: 0px;
+     }
+    </style>
+    
+    <script>
+      idk=0;
+      let sum12 = 0;
+      id_array = new Array();
+      let data = '[{"address_from":"Partizanska 1", "address_to":"Kliment Ohridski 15", "weight":"3.5", "paid_type":"on_send", "ID":"Id902 90sUsdql3", "delivery": "on_hold"},{"address_from":"Ruzveltova 3", "address_to":"3MUB 43", "weight":"15", "paid_type":"on_receive", "ID":"W8902 90sWmPqLzl3", "delivery": "false"}]';
+      let obj = JSON.parse(data);
+      window.onload = function(){
+        for(var i=0;i<obj.length;i++){
+          row = document.createElement("tr");
+          address_from = obj[i].address_from;
+          address_to = obj[i].address_to;
+          weight = obj[i].weight;
+          paid_type = obj[i].paid_type;
+          ID_t = obj[i].ID;
+          row.setAttribute('id',ID_t);
+          delivery = obj[i].delivery;
+          var cena;
+          originalID=ID_t.toLowerCase().split(" ").join("-");
+          id_array.push(originalID);
+          if(weight<5){
+            cena=500;
+          }
+          else{
+            cena=1200;
+          }
+          row.innerHTML = "<td>"+originalID+"</td>"+"<td>"+address_from+"</td>"+"<td>"+address_to+"</td>"+"<td>"+cena+"</td>"+
+          "<td><button id='dostaveno' onclick='dostaveno(this)'>Доставено</button><br><button id='otkazano' onclick='otkazano(this)'>Откажано</button></td>"
+          tbody.appendChild(row);
+          if(delivery=="on_hold"){
+            dostaveno(document.getElementById("dostaveno"));
+          }
+        }
+      };
+      function vnesi(){
+        row = document.createElement("tr");
+        tbody = document.getElementById("tbody");
+          address_from = document.getElementById("from").value;
+          address_to = document.getElementById("to").value;
+          weight = document.getElementById("weight").value;
+          var paid_type;
+          pp = document.getElementsByName("nacin");
+          for(var i=0;i<pp.length;i++){
+            if(pp[i].checked)
+            {
+              paid_type=pp[i].value;
+            }
+          }
+          ID_t = document.getElementById("id").value;
+          row.setAttribute('id',ID_t);
+          
+          // delivery = obj[i].delivery;
+          if(address_from=="" || address_to=="" || weight=="" || paid_type=="" || ID_t=="" ){
+            alert("Greska pri vnesuvanje!");
+            return;
+          }
+
+          for(var i=0;i<id_array.length;i++){
+            if(id_array[i]!==null){
+            if(id_array[i].toString().toLowerCase()==ID_t.toString().toLowerCase()){
+              return;
+            }
+          }
+          }
+          var cena;
+          originalID=ID_t.toLowerCase().split(" ").join("-");
+          if(weight<5){
+            cena=500;
+          }
+          else{
+            cena=1200;
+          }
+          id_array.push(ID_t);
+          row.innerHTML = "<td>"+originalID+"</td>"+"<td>"+address_from+"</td>"+"<td>"+address_to+"</td>"+"<td>"+cena+"</td>"+
+          "<td><button id='dostaveno' onclick='dostaveno(this)'>Доставено</button><br><button id='otkazano' onclick='otkazano(this)'>Откажано</button></td>"
+          tbody.appendChild(row);
+      }
+      function dostaveno(ref){
+        row=ref.parentNode.parentNode;
+        ref.disabled=true;
+        ref.nextSibling.nextSibling.disabled=true;
+        row.style.backgroundColor="lightgreen";
+        k = parseInt(row.children[3].innerHTML);
+        sum12+=k;
+        document.getElementById("suma12").innerHTML = sum12;
+      }
+      function otkazano(ref){
+        row = ref.parentNode.parentNode;
+        idii=row.id;
+        console.log(idii);
+        for(var i=0;i<id_array.length;i++){
+          if(id_array[i]==idii){
+            id_array[i]=null;
+          }
+        }
+        row.style.opacity=1;
+        myInterval = setInterval(function(){
+          row.style.opacity-=0.1
+        },100);
+        setTimeout(function(){
+          clearInterval(myInterval);
+          row.remove();
+          lista = document.getElementById("lista");
+          tex = document.createTextNode(row.children[0].innerHTML);
+          li = document.createElement("li");
+          li.appendChild(tex);
+          lista.appendChild(li);
+        },1000);
+      }
+      </script>
+</head>
+<body>
+  <div>
+ <h1>Карго достава на пратки:</h1>
+ <label>Адреса на испраќач:</label> <input type="text" id="from"> <br>
+ <label>Адреса на примач:</label> <input type="text" id="to"><br>
+ <label>Тежина на пратка:</label> <input type="text" id="weight"><br>
+ <label>Начин на плаќање:</label> Праќање:<input type="radio" name="nacin" value="prakjanje"> Примање:<input type="radio" name="nacin" value="primanje"><br>
+ <label>ID на профил:</label> <input type="text" id="id"><br>
+ <button id="btn" onclick="vnesi()">Внеси</button>
+</div>
+ <div>
+  <h2>Внесени пратки</h2>
+  <h3>Вкупна сума: <span id="suma12">0</span></h3>
+  <table>
+    <thead>
+      <tr>
+          <td>ID</td>
+          <td>Адреса испраќач</td>
+          <td>Адреса примач</td>
+          <td>Цена</td>
+          <td>Акции</td>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+
+    </tbody>
+  </table>
+ </div>
+ <div id="right">
+  <h2>Откажани нарачки</h2>
+  <ul id="lista">
+
+  </ul>
+ </div>
+</body>
+</html>
